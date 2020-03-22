@@ -1,0 +1,25 @@
+# Node
+node_modules/
+dist/
+
+# SASS
+.sass-cache/
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Logs
+*.log*
+
+# ESLint
+.eslintcache
+
+# Others
+.compiled/
+.db/
+*.class
+*.*~
+*~
+.merge_file*
+src/config.json
