@@ -1,3 +1,3 @@
-import tydomRoutes from "./tydom/routes";
+import routes from "./routes";
 
-export default [...tydomRoutes];
+export default [...routes];

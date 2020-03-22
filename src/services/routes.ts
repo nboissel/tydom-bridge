@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
-import { getAllCoversInfo, getCoverInfo, closeCover } from './TydomController';
+import CoverService from './CoverService';
+
+const service = new CoverService();
 
 export default [
   {
@@ -7,15 +9,15 @@ export default [
     method: "put",
     handler: async (req: Request, res: Response) => {
       const {id, position} = req.body;
-      const result = await closeCover(id, position);
+      const result = await service.setPosition(id, position);
       res.status(200).send();
     }
   },
   {
-    path: "/api/cover/:id",
+    path: "/api/cover/:name",
     method: "get",
     handler: async (req: Request, res: Response) => {
-      const result = await getCoverInfo(req.params.id);
+      const result = await service.getCoverPosition(req.params.name);
       
       res.status(200).send(result);
     }
@@ -24,7 +26,7 @@ export default [
     path: "/api/covers",
     method: "get",
     handler: async (req: Request, res: Response) => {
-      const result = await getAllCoversInfo(req.params.id);
+      const result = await service.getAllCoversPositions();
       
       res.status(200).send(result);
     }

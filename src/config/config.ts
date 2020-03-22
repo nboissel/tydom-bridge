@@ -2,7 +2,20 @@ import {tydom, mqtt, devices} from '../config.json'
 
 export const tydomConfig : ITydomConfig = tydom;
 export const mqttConfig : IMqttConfig = mqtt;
-export const deviceMap : IDevicesConfig = devices;
+
+const deviceConfig : IDevicesConfig = devices;
+
+let idTydomToName : { [id: number] : string } = {}
+let nameToTydom : { [id: string] : number } = {}
+deviceConfig.covers.forEach((cover) => {
+    idTydomToName[cover.tydomId] = cover.localId,
+    nameToTydom[cover.localId] = cover.tydomId
+})
+
+export const coverConfig = {
+    idTydomToName: idTydomToName,
+    nameToTydom: nameToTydom
+}
 
 interface ITydomConfig {
     mac: string
@@ -23,6 +36,6 @@ interface IDevicesConfig {
 }
 
 interface IIdMapping {
-    tydomId: string
+    tydomId: number
     localId: string
 }
