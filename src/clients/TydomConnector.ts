@@ -18,17 +18,16 @@ export default class TydomConnector {
             hostname: tydomConfig.hostname
         });
         this.logger = createLogger('TydomConnector');
+        this.client.connect();
     }
 
     /**
      * Set data for a specified device
      */
     async setData(deviceId: number, data: object) {
-        await this.client.connect();
         await this.client.put(`/devices/${deviceId}/endpoints/${deviceId}/data`, [
             data
           ]);
-        await this.client.close();
     }
 
     /**
@@ -36,9 +35,7 @@ export default class TydomConnector {
      */ 
     async getInfo(deviceId: number) : Promise<TDeviceInfo> {
         this.logger.info(`Getting info for device ${deviceId}.`)
-        await this.client.connect();
         const response: unknown = await this.client.get(`/devices/${deviceId}/endpoints/${deviceId}/data`);
-        await this.client.close();
         return <TDeviceInfo> response;
     }
 
@@ -47,15 +44,30 @@ export default class TydomConnector {
      */
     async getAllInfo() : Promise<TAllInfo[]> {
         this.logger.info(`Getting info for all devices.`)
-        await this.client.connect();
         const response: unknown = await this.client.get(`/devices/data`);
-        await this.client.close();
         return <TAllInfo[]> response;
     }
 
+    /**
+     * Create a listener for state change in Tydom
+     * 
+     * @param fun function to apply to received messages
+     */
+    startListener(fun: (change: TChangeEvent) => void) {
+        this.logger.info('Starting listener on Tydom changes');
+        this.client.on('message', message => {
+            if(message.uri !== '/device/data' && message.method !== 'PUT' 
+                && message.status != 200) {
+                return;
+            } else {
+                const change : TChangeEvent = message;
+                fun(change);
+            }
+        })
+    }
 }
 
-interface TDeviceInfo {
+export interface TDeviceInfo {
     id?: string
     error: number
     data: TData[]
@@ -70,4 +82,13 @@ interface TData {
 interface TAllInfo {
     id: string
     endpoints: TDeviceInfo[]
+}
+
+interface TChangeEvent {
+    type: string
+    uri: string
+    method: string
+    status: number
+    body: TAllInfo[]
+    headers: object
 }

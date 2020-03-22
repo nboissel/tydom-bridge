@@ -1,5 +1,5 @@
 import { coverConfig } from '../config/config';
-import TydomClient from "../clients/TydomConnector";
+import TydomClient, { TDeviceInfo } from "../clients/TydomConnector";
 import {Logger} from 'winston';
 import createLogger from '../utils/logger';
 
@@ -10,6 +10,7 @@ export default class CoverService {
     constructor() {
         this.client = new TydomClient();
         this.logger = createLogger('CoverService');
+        this.startCoverPositionListener();
     }
 
     /**
@@ -71,13 +72,31 @@ export default class CoverService {
                      }});
         return result;
     }
+
+    /**
+     * Start listener on cover position changes
+     */
+    startCoverPositionListener() {
+        this.client.startListener(change => {
+            const deviceInfo = this._getPositionFromEndpoint(change.body[0]?.endpoints[0]);
+            this.logger.info(`Position change detected for cover ${deviceInfo.name}. New position ${deviceInfo.position}`);
+        })
+    }
     
-    _getTydomId = (coverName: string) : number => {
+    _getTydomId(coverName: string) : number {
         return coverConfig.nameToTydom[coverName];
     }
 
-    _getName = (tydomId: number) : string => {
+    _getName(tydomId: number) : string {
         return coverConfig.idTydomToName[tydomId];
+    }
+
+    _getPositionFromEndpoint(device : TDeviceInfo): ICoverInfo {
+        const name = (typeof device.id == 'number') ? this._getName(device.id) : device.id;
+        return {
+            name: name, 
+            position: device.data.filter(entry => entry.name == 'position').pop()?.value
+        };
     }
 }
 
