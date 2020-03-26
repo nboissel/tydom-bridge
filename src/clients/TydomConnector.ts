@@ -59,7 +59,6 @@ export default class TydomConnector {
     startListener(fun: (change: TChangeEvent) => void) {
         this.logger.info('Starting listener on Tydom changes');
         this.client.on('message', message => {
-            console.log(message);
             if(message.uri !== '/device/data' && message.method !== 'PUT' 
                 && message.status != 200) {
                 return;

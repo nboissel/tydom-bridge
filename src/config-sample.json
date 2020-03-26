@@ -15,11 +15,6 @@
 			"command": "cover/+/set",
 			"position": "cover/+/position",
 			"position_set": "cover/+/set_position"
-		},
-		"commands": {
-			"open": "OPEN",
-			"close": "CLOSE",
-			"stop": "STOP"
 		}
 	},
 	"devices": {
