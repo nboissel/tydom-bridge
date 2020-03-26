@@ -24,10 +24,17 @@ interface ITydomConfig {
 }
 
 interface IMqttConfig {
-    host: string
-    port: number
-    username?: string
-    password?: string
+    client: {
+        host: string
+        port: number
+        username?: string
+        password?: string
+    }
+    topics: {
+        command: string
+        position: string
+        position_set: string
+    }
 }
 
 interface IDevicesConfig {

@@ -1,16 +1,20 @@
 import { coverConfig } from '../config/config';
-import TydomClient, { TDeviceInfo } from "../clients/TydomConnector";
+import TydomClient, { TDeviceInfo, TChangeEvent } from "../clients/TydomConnector";
+import MqttClient from '../clients/MqttConnector';
 import {Logger} from 'winston';
 import createLogger from '../utils/logger';
 
 export default class CoverService {
     client: TydomClient
+    mqttClient: MqttClient
     logger: Logger
 
     constructor() {
         this.client = new TydomClient();
         this.logger = createLogger('CoverService');
-        this.startCoverPositionListener();
+        this.mqttClient = new MqttClient();
+        // Init Tydom to MQTT communication
+        this._startCoverPositionListener();
     }
 
     /**
@@ -73,14 +77,24 @@ export default class CoverService {
         return result;
     }
 
-    /**
-     * Start listener on cover position changes
-     */
-    startCoverPositionListener() {
-        this.client.startListener(change => {
-            const deviceInfo = this._getPositionFromEndpoint(change.body[0]?.endpoints[0]);
-            this.logger.info(`Position change detected for cover ${deviceInfo.name}. New position ${deviceInfo.position}`);
-        })
+    _startCoverPositionListener() {
+        this.client.startListener(this._handlePositionChange.bind(this));
+    }
+
+    _startCoverCommandListener() {
+        this.mqttClient.startTopicListener(this._commandAction.bind(this), this.setPosition.bind(this));
+    }
+
+    _commandAction(coverName: string, command: string) {
+        switch(command){
+            case 'OPEN': 
+                this.openCover(coverName);
+                break;
+            case 'CLOSE':
+                this.closeCover(coverName);
+                break;
+            default:
+        }
     }
     
     _getTydomId(coverName: string) : number {
@@ -89,6 +103,16 @@ export default class CoverService {
 
     _getName(tydomId: number) : string {
         return coverConfig.idTydomToName[tydomId];
+    }
+
+    _handlePositionChange(change: TChangeEvent) {
+        change.body.forEach(body => {
+            body.endpoints.forEach(endpoint => {
+                const deviceInfo = this._getPositionFromEndpoint(endpoint);
+                this.logger.info(`Sending new position for cover ${deviceInfo.name}: ${deviceInfo.position}`);
+                this.mqttClient.sendCoverNewPosition('' + deviceInfo.name, deviceInfo.position);
+            });
+        });
     }
 
     _getPositionFromEndpoint(device : TDeviceInfo): ICoverInfo {

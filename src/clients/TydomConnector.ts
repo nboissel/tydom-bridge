@@ -12,12 +12,15 @@ export default class TydomConnector {
     logger: Logger
 
     constructor() {
+        this.logger = createLogger('TydomConnector');
+
         this.client = createClient({
             username: tydomConfig.mac,
             password: tydomConfig.password,
             hostname: tydomConfig.hostname
         });
-        this.logger = createLogger('TydomConnector');
+        
+        this.logger.info("Connecting to Tydom server");
         this.client.connect();
     }
 
@@ -56,6 +59,7 @@ export default class TydomConnector {
     startListener(fun: (change: TChangeEvent) => void) {
         this.logger.info('Starting listener on Tydom changes');
         this.client.on('message', message => {
+            console.log(message);
             if(message.uri !== '/device/data' && message.method !== 'PUT' 
                 && message.status != 200) {
                 return;
@@ -84,7 +88,7 @@ interface TAllInfo {
     endpoints: TDeviceInfo[]
 }
 
-interface TChangeEvent {
+export interface TChangeEvent {
     type: string
     uri: string
     method: string

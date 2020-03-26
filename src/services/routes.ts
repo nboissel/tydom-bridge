@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import CoverService from './CoverService';
 
 const service = new CoverService();
+service._startCoverCommandListener();
 
 export default [
   {
