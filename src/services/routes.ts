@@ -2,7 +2,10 @@ import { Request, Response } from "express";
 import CoverService from './CoverService';
 
 const service = new CoverService();
-service._startCoverCommandListener();
+// Init Tydom to MQTT communication
+service.startCoverPositionListener();
+// Init MQTT to Tydom communication
+service.startCoverCommandListener();
 
 export default [
   {
@@ -22,7 +25,7 @@ export default [
       
       res.status(200).send(result);
     }
-  },
+  }, 
   {
     path: "/api/covers",
     method: "get",

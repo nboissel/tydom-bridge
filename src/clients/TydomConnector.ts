@@ -9,6 +9,7 @@ import {tydomConfig} from '../config/config';
 
 export default class TydomConnector {
     client: TydomClient;
+    isReady: boolean;
     logger: Logger
 
     constructor() {
@@ -19,15 +20,23 @@ export default class TydomConnector {
             password: tydomConfig.password,
             hostname: tydomConfig.hostname
         });
-        
+        this.isReady = false;
+    }
+
+    async init() {
         this.logger.info("Connecting to Tydom server");
-        this.client.connect();
+        await this.client.connect();
+        this.isReady = true;
+        this.logger.info("Tydom connector initialized");
     }
 
     /**
      * Set data for a specified device
      */
     async setData(deviceId: number, data: object) {
+        // Avoid commands if connector is not ready (existing MQTT events at startup)
+        if(!this.isReady) return;
+        
         await this.client.put(`/devices/${deviceId}/endpoints/${deviceId}/data`, [
             data
           ]);
@@ -56,7 +65,9 @@ export default class TydomConnector {
      * 
      * @param fun function to apply to received messages
      */
-    startListener(fun: (change: TChangeEvent) => void) {
+    async startListener(fun: (change: TChangeEvent) => void) {
+        await this.init();
+
         this.logger.info('Starting listener on Tydom changes');
         this.client.on('message', message => {
             if(message.uri !== '/device/data' && message.method !== 'PUT' 

@@ -13,8 +13,6 @@ export default class CoverService {
         this.client = new TydomClient();
         this.logger = createLogger('CoverService');
         this.mqttClient = new MqttClient();
-        // Init Tydom to MQTT communication
-        this._startCoverPositionListener();
     }
 
     /**
@@ -77,11 +75,11 @@ export default class CoverService {
         return result;
     }
 
-    _startCoverPositionListener() {
-        this.client.startListener(this._handlePositionChange.bind(this));
+    async startCoverPositionListener() {
+        await this.client.startListener(this._handlePositionChange.bind(this));
     }
 
-    _startCoverCommandListener() {
+    startCoverCommandListener() {
         this.mqttClient.startTopicListener(this._commandAction.bind(this), this.setPosition.bind(this));
     }
 
