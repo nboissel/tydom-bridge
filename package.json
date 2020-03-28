@@ -1,6 +1,6 @@
 {
   "name": "tydom-bridge",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Tydom to MQTT bridge",
   "main": "src/server.ts",
   "scripts": {
@@ -9,7 +9,7 @@
     "start": "ts-node dist/server.js"
   },
   "author": "nboissel",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "private": true,
   "dependencies": {
     "compression": "^1.7.4",

@@ -10,11 +10,12 @@ export const tydomConfig = {
 export const mqttConfig = {
     client: {
         host: process.env.TB_MQTT_HOST || mqtt.client.host,
-        port: mqtt.client.host || 1883,
+        port: mqtt.client.port || 1883,
         username: process.env.TB_MQTT_USERNAME || mqtt.client.username,
         password: process.env.TB_MQTT_PASSWORD || mqtt.client.password
     },
-    topics: mqtt.topics
+    topics: mqtt.topics,
+    ha_discovery_prefix: mqtt.ha_discovery_prefix
 };
 
 const deviceConfig : IDevicesConfig = devices;

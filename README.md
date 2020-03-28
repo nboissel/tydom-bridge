@@ -31,7 +31,8 @@ The whole configuration is centralized in a config file `config.json`:
 			"command": "cover/+/set",
 			"position": "cover/+/position",
 			"position_set": "cover/+/set_position"
-		}
+		},
+		"ha_discovery_prefix": "homeassistant" 
 	},
 	"devices": {
 		"covers": [
@@ -63,6 +64,8 @@ In order to make this bridge useable with any MQTT client, the topics can be cus
 - `position`: to send cover position (listening from Tydom box)
 - `position_set`: to listen for cover position request, from `0` (close) to `100` open
 
+Finally, Home assistant discovery can be enabled setting the `ha_discovery_prefix` (see [Using discovery](#using-discovery-recommended)).
+
 ### Devices
 Tydom usually use internal ids for devices which are not convenient for readability in home automation configuration. This configuration enable id mapping to use any name as device id:
 - `tydomId`: internal device id for Tydom. The full list can be retrieved using REST API
@@ -72,6 +75,22 @@ Tydom usually use internal ids for devices which are not convenient for readabil
 ## Home Assistant configuration
 
 This project can be used with any external system using MQTT but was initially created to connect Tydom box to Home Assistant.
+
+We provide two methods for Home Assistant integration: manual or using discovery.
+
+### Using discovery (recommended) 
+
+This is the recommended method as it will automatically declare new entities in HA.
+
+You just must add to your HA `mqtt` configuration:
+```yaml
+mqtt:
+  discovery: true
+  discovery_prefix: homeassistant
+```
+Of course, the discovery prefix can be changed but it must be the same as the one you declared in `config.json` file (`ha_discovery_prefix`).
+
+### Manual integration
 
 Here is the configuration for Home Assistant to integrate one cover named `office`:
 ```yaml

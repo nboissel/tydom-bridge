@@ -15,7 +15,8 @@
 			"command": "cover/+/set",
 			"position": "cover/+/position",
 			"position_set": "cover/+/set_position"
-		}
+		},
+		"ha_discovery_prefix": "homeassistant"
 	},
 	"devices": {
 		"covers": [
