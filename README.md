@@ -8,7 +8,6 @@ For now, it only handles Delta Dore covers and works with both main event types:
 ![Events types](doc/tydom-bridge_schema.png "Logo Title Text 1")
 
 
-
 # Configuration
 
 ## Bridge configuration
@@ -44,19 +43,20 @@ The whole configuration is centralized in a config file `config.json`:
 	}
 }
 ```
+Sensitive data can also be override by environment variables (indicated in brackets).
 
 ### Tydom 
 Very simple, it only handles Tydom connection:
-- `mac`: Tydom box MAC address, all in majuscules without colon
-- `password`: password used in Tydom app
-- `hostname`: local IP or mediation.tydom.com for external use
+- `mac` (`TB_TYDOM_MAC`): Tydom box MAC address, all in majuscules without colon
+- `password` (`TB_TYDOM_PASSWORD`): password used in Tydom app
+- `hostname` (`TB_TYDOM_HOSTNAME`): local IP or mediation.tydom.com for external use
 
 ### MQTT
 The client part is for connection information:
-- `host`: MQTT server hostname or IP (incl. protocol)
+- `host` (`TB_MQTT_HOST`): MQTT server hostname or IP (incl. protocol)
 - `port`: MQTT server port
-- `username`: (optional) user login
-- `password`: (optional) user password
+- `username` (`TB_MQTT_USERNAME`): (optional) user login
+- `password` (`TB_MQTT_PASSWORD`): (optional) user password
 
 In order to make this bridge useable with any MQTT client, the topics can be customized. The `+` caracter corresponds to the cover name:
 - `command`: to listen for cover commands (`OPEN` or `CLOSE`) 
@@ -80,7 +80,7 @@ cover:
     name: "Office cover"
     command_topic: "cover/office/set"
     position_topic: "cover/office/position"
-    set_position_topic: "cover/office/setset_position"
+    set_position_topic: "cover/office/set_position"
     qos: 0
     retain: true
     payload_open: "OPEN"

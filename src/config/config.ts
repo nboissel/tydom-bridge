@@ -1,7 +1,21 @@
 import {tydom, mqtt, devices} from '../config.json'
 
-export const tydomConfig : ITydomConfig = tydom;
-export const mqttConfig : IMqttConfig = mqtt;
+
+export const tydomConfig = {
+    mac: process.env.TB_TYDOM_MAC || tydom.mac,
+    password: process.env.TB_TYDOM_PASSWORD || tydom.password,
+    hostname: process.env.TB_TYDOM_HOSTNAME || tydom.hostname
+}
+
+export const mqttConfig = {
+    client: {
+        host: process.env.TB_MQTT_HOST || mqtt.client.host,
+        port: mqtt.client.host || 1883,
+        username: process.env.TB_MQTT_USERNAME || mqtt.client.username,
+        password: process.env.TB_MQTT_PASSWORD || mqtt.client.password
+    },
+    topics: mqtt.topics
+};
 
 const deviceConfig : IDevicesConfig = devices;
 
@@ -15,26 +29,6 @@ deviceConfig.covers.forEach((cover) => {
 export const coverConfig = {
     idTydomToName: idTydomToName,
     nameToTydom: nameToTydom
-}
-
-interface ITydomConfig {
-    mac: string
-    password: string
-    hostname: string
-}
-
-interface IMqttConfig {
-    client: {
-        host: string
-        port: number
-        username?: string
-        password?: string
-    }
-    topics: {
-        command: string
-        position: string
-        position_set: string
-    }
 }
 
 interface IDevicesConfig {
