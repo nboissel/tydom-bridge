@@ -102,8 +102,9 @@ cover:
     set_position_topic: "cover/office/set_position"
     qos: 0
     retain: true
-    payload_open: "OPEN"
-    payload_close: "CLOSE"
+    payload_open: "UP"
+	payload_close: "DOWN"
+	payload_stop: "STOP"
     position_open: 100
     position_closed: 0
     optimistic: false

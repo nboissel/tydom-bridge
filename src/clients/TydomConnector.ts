@@ -65,7 +65,7 @@ export default class TydomConnector {
      * 
      * @param fun function to apply to received messages
      */
-    async startListener(fun: (change: TChangeEvent) => void) {
+    async initAndStartListener(fun: (change: TChangeEvent) => void) {
         await this.init();
 
         this.logger.info('Starting listener on Tydom changes');

@@ -42,7 +42,15 @@ export default class MqttConnector {
         const commandRegEx = new RegExp('^' + this.commandTopic.replace("+", "(.+)") + '$');
         const positionSetRegEx = new RegExp('^' + this.positionSetTopic.replace("+", "(.+)") + '$');
 
+        let gracePeriodEnd = new Date();
+        gracePeriodEnd.setSeconds(gracePeriodEnd.getSeconds() + 2);
+
         this.client.on('message', (topic, message) => {
+            // gracePeriod to avoid unnecessary Tydom command at startup
+            if((new Date()).getTime() < gracePeriodEnd.getTime()) {
+                return;
+            }
+            
             if(commandRegEx.test(topic)) {
                 const result = commandRegEx.exec(topic);
                 if(result != null) {
@@ -65,9 +73,11 @@ export default class MqttConnector {
      * @param coverName 
      * @param position 
      */
-    sendCoverNewPosition(coverName: string, position: number) {
-        const targetTopic = mqttConfig.topics.position.replace("+", coverName);
-        this.client.publish(targetTopic, position.toString());
+    updateCoverPosition(coverName: string | undefined, position: number) {
+        if(coverName) {
+            const targetTopic = mqttConfig.topics.position.replace("+", coverName);
+            this.client.publish(targetTopic, position.toString());
+        }
     }
 
     /**
@@ -95,8 +105,9 @@ export default class MqttConnector {
                     set_position_topic: mqttConfig.topics.position_set.replace('+', id),
                     qos: 0,
                     retain: false,
-                    payload_open: 'OPEN',
-                    payload_close: 'CLOSE',
+                    payload_open: 'UP',
+                    payload_close: 'DOWN',
+                    payload_stop: 'STOP',
                     position_open: 100,
                     position_closed: 0,
                     optimistic: false

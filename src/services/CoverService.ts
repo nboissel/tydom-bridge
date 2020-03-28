@@ -22,10 +22,24 @@ export default class CoverService {
      */
     async setPosition(coverName: string, position: number) {
         const coverId = this._getTydomId(coverName);
-        this.logger.info(`Setting cover ${coverName} (${coverId}) to position ${position}.`)
+        this.logger.info(`Send position ${position} to cover ${coverName} (${coverId}).`)
         return await this.client.setData(coverId, {
             name: 'position',
             value: position
+        });
+    };
+
+    /**
+     * Send command to cover `coverName`. Can be UP, DOWN or STOP.
+     * @param coverName 
+     * @param command number (0-100)
+     */
+    async setPositionCmd(coverName: string, command: string) {
+        const coverId = this._getTydomId(coverName);
+        this.logger.info(`Send command ${command} to cover ${coverName} (${coverId}).`)
+        return await this.client.setData(coverId, {
+            name: 'positionCmd',
+            value: command
         });
     };
 
@@ -76,23 +90,18 @@ export default class CoverService {
     }
 
     async startCoverPositionListener() {
-        await this.client.startListener(this._handlePositionChange.bind(this));
+        // Init Tydom and start Tydom listener to listen position changes
+        await this.client.initAndStartListener(this._handlePositionChange.bind(this));
+
+        // Ensure MQTT is updated with current positions
+        const coverPositions = await this.getAllCoversPositions();
+        coverPositions.forEach(coverPosition => {
+                this.mqttClient.updateCoverPosition(coverPosition.name, coverPosition.position);
+        });
     }
 
     startCoverCommandListener() {
-        this.mqttClient.startTopicListener(this._commandAction.bind(this), this.setPosition.bind(this));
-    }
-
-    _commandAction(coverName: string, command: string) {
-        switch(command){
-            case 'OPEN': 
-                this.openCover(coverName);
-                break;
-            case 'CLOSE':
-                this.closeCover(coverName);
-                break;
-            default:
-        }
+        this.mqttClient.startTopicListener(this.setPositionCmd.bind(this), this.setPosition.bind(this));
     }
     
     _getTydomId(coverName: string) : number {
@@ -107,8 +116,7 @@ export default class CoverService {
         change.body.forEach(body => {
             body.endpoints.forEach(endpoint => {
                 const deviceInfo = this._getPositionFromEndpoint(endpoint);
-                this.logger.info(`Sending new position for cover ${deviceInfo.name}: ${deviceInfo.position}`);
-                this.mqttClient.sendCoverNewPosition('' + deviceInfo.name, deviceInfo.position);
+                this.mqttClient.updateCoverPosition('' + deviceInfo.name, deviceInfo.position);
             });
         });
     }
